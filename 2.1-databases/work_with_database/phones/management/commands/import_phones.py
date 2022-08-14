@@ -3,6 +3,7 @@ from django.template.defaultfilters import slugify
 
 from django.core.management.base import BaseCommand
 from phones.models import Phone
+import re
 
 
 class Command(BaseCommand):
@@ -10,18 +11,26 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        with open('phones.csv', 'r') as file:
+        with open('phones.csv', 'r', encoding='utf8') as file:
             # phones = list(csv.DictReader(file, delimiter=';'))
             phones = csv.reader(file, delimiter=';')
-            next(phones)
+            #next(phones)
+
+
+    def handle(self, *args, **options):
+        with open('phones.csv', 'r') as file:
+            phones = list(csv.DictReader(file, delimiter=';'))
 
         for phone in phones:
-            new_phone = Phone.objects.create(
-                id=int(phone[0]),
-                name=phone[1],
-                image=phone[2],
-                price=int(phone[3]),
-                release_date=phone[4],
-                lte_exists=phone[5],
-                slug=slugify(phone[1]),
+            # TODO: Добавьте сохранение модели
+            added_phone = Phone(
+                id=phone['id'],
+                name=phone['name'],
+                price=int(phone['price']),
+                image=phone['image'],
+                release_date=phone['release_date'],
+                lte_exists=bool(phone['lte_exists'].capitalize()),
+                slug=slugify(phone['name'])
             )
+
+            added_phone.save()
